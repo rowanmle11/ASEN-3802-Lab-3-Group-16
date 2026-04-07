@@ -30,7 +30,7 @@ title('NACA Airfoil Shape')
 
 alpha = 12;
 
-Num_Panels = 500;
+Num_Panels = 100;
 chord = 1;
 cl = zeros(1,Num_Panels);
 
@@ -106,6 +106,32 @@ plot(alpha,cl_tat,'k--','DisplayName','Thin Airfoil Theory')
 plot(alpha,cl_panel(1,:),'b-','DisplayName','NACA 0006')
 plot(alpha,cl_panel(2,:),'r-','DisplayName','NACA 0012')
 plot(alpha,cl_panel(3,:),'g-','DisplayName','NACA 0018')
+
+% experimental data plots
+
+xlabel('Angle of Attack, \alpha (degrees)')
+ylabel('Sectional Lift Coefficient, c_l')
+title('Effect of Airfoil Thcikness on Lift Coefficient')
+legend('Location','best')
+hold off
+
+linear_idx = find(alpha >= -5 & alpha <= 5);
+
+fprintf('\nZero-Lift AoA (degrees):\n')
+fprintf('%-15s | %-15s | %-15s | %-15s\n','Airfoil','TAT','Vortex Panel','Experimental')
+fprintf(repmat('-',1,65),'\n')
+
+fprintf('\nLift Slope (1/degrees):\n')
+fprintf('%-15s | %-15s | %-15s | %-15s\n','Airfoil','TAT','Vortex Panel','Experimental')
+fprintf(repmat('-',1,65),'\n')
+
+for i = 1:length(t)
+    P_panel = polyfit(alpha(linear_idx),cl_panel(i,linear_idx),1);
+    slope_panel = P_panel(1);
+    alpha_L0_panel = -P_panel(2)/P_panel(1);
+
+    fprintf('\n%-15s | %-15.2f | %-15.2f | %-15s\n',airfoils{i},0,alpha_L0_panel,' ')
+end
 
 %% Task 4 Effect of Airfoil Camber on Lift
 
