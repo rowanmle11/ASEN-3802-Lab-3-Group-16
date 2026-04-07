@@ -30,15 +30,18 @@ title('NACA Airfoil Shape')
 
 alpha = 12;
 
-Num_Panels = 100;
+Num_Panels = 500;
 chord = 1;
 cl = zeros(1,Num_Panels);
+    count = 0;
 
-for i = 2:Num_Panels+1
-    [x,y,xc,yc] = NACA_Airfoils(0,0,0.12,chord,i);
-    cl(i-1) = Vortex_Panel(x,y,alpha);
-end
-c_intersect = (cl(length(cl))- 0.01*cl(length(cl))) * ones(1,100);
+    for i = 2:Num_Panels+1
+        count = count + 1
+        [x,y,xc,yc] = NACA_Airfoils(0,0,0.12,chord,i);
+        cl(i-1) = Vortex_Panel(x,y,alpha);
+    end
+
+c_intersect = (cl(length(cl))- 0.01*cl(length(cl))) * ones(1,Num_Panels);
 x_axis = 2:Num_Panels+1;
 [xid,yid] = polyxpoly(x_axis,cl,x_axis,c_intersect);
 
@@ -53,8 +56,9 @@ ylabel('Cl Values')
 yline(cl(length(cl)) + 0.01*cl(length(cl)), 'r--')
 yline(cl(length(cl)) - 0.01*cl(length(cl)), 'r--')
 xline(ceil(xid),'k', 'LineWidth', 1.5);
-xlim([0,100]);
-legend('Cl', '+1% Cl_{final}','-1% Cl_{final}','Min Number of Panels = 29', 'Interpreter', 'tex', 'Location','Best')
+plot(ceil(xid),yid,'Marker','o','MarkerSize',8,'LineWidth',2,'Color','b');
+xlim([0,Num_Panels]);
+legend('C_{L}', '+1% C_{L final}','-1% C{L final}','Min Number of Panels = 29', '1% intersect','Interpreter', 'tex', 'Location','Best')
 title('Cl vs. Number of Panels')
 hold off
 
@@ -66,7 +70,7 @@ cl_pred = interp1(x_axis, cl, min_panels_pred);
 
 rel_error = abs(cl_pred - cl_exact)/abs(cl_exact);
 
-Results = table(cl_exact, panels_exact, cl_pred, rel_error, min_panels_pred,'VariableNames', {'Cl_Exact','Panels_Exact','Cl_Predicted','Relative_Error','Min_Panels_Predicted'});
+Results = table(cl_exact, panels_exact, cl_pred, rel_error, min_panels_pred,'VariableNames', {'C_{L Exact}','Panels_Exact','C{L Predicted}','Relative_Error','Min_Panels_Predicted'});
 
 disp(Results)
 
@@ -135,7 +139,52 @@ end
 
 %% Task 4 Effect of Airfoil Camber on Lift
 
+N = ceil(xid);
 
+alpha_vals = -100:100;
+chord = 1;
+cl1 = zeros(1,length(alpha_vals));
+cl2 = zeros(1,length(alpha_vals));
+cl3 = zeros(1,length(alpha_vals));
+
+for i = 1:length(alpha_vals)
+
+    [x1,y1,xc1,yc1] = NACA_Airfoils(0,0,0.12,chord,N);
+    cl1(i) = Vortex_Panel(x1,y1,alpha_vals(i));
+
+    [x2,y2,xc2,yc2] = NACA_Airfoils(0.02,0.4,0.12,chord,N);
+    cl2(i) = Vortex_Panel(x2,y2,alpha_vals(i));
+    
+    [x3,y3,xc3,yc3] = NACA_Airfoils(0.04,0.4,0.12,chord,N);
+    cl3(i) = Vortex_Panel(x3,y3,alpha_vals(i));
+
+end
+
+c_intersect = zeros(1,length(alpha_vals));
+x_axis = 1:length(alpha_vals);
+[xid1,yid1] = polyxpoly(x_axis,cl1,x_axis,c_intersect);
+[xid2,yid2] = polyxpoly(x_axis,cl2,x_axis,c_intersect);
+[xid3,yid3] = polyxpoly(x_axis,cl3,x_axis,c_intersect);
+
+zero_lift_AOA1 = cl1(ceil(xid1))
+zero_lift_AOA2 = cl2(ceil(xid2))
+zero_lift_AOA3 = cl3(ceil(xid3))
+
+figure();
+hold on
+plot(alpha_vals,cl1, 'Color', 'b', 'LineWidth', 2)
+plot(alpha_vals,cl2, 'Color', 'r', 'LineWidth', 2)
+plot(alpha_vals,cl3, 'Color', 'magenta', 'LineWidth', 2)
+xlabel('AOA \alpha [Deg]', 'Interpreter', 'tex')
+ylabel('C_{L}')
+legend('NACA 0012', 'NACA 2412', 'NACA 4412', 'Location', 'Best')
+title('C_{L} vs. \alpha', 'Interpreter', 'tex')
+
+hold off
+
+cl1_id = find(cl1 == 0, 1);
+cl2_id = find(cl2 == 0, 1);
+cl3_id = find(cl3 == 0, 1);
 
 %% FUNCTIONS
 
@@ -150,24 +199,15 @@ function [x_b, y_b, x, y_c] = NACA_Airfoils(m,p,t,c,N)
     y_c = zeros(size(x));
     dyc_dx = zeros(size(x));
 
-    for i = 1:length(x)
-        if x(i) < p*c
-            if p == 0
-                y_c(i) = 0;
-                dyc_dx(i) = 0;
-            else
-                y_c(i) = m*(x(i)/p^2)*(2*p-x(i)/c);
-                dyc_dx(i) = (2*m/p^2)*(p-x(i)/c);
-            end
-        else
-            if p == 1
-                y_c(i) = 0;
-                dyc_dx(i) = 0;
-            else
-                y_c(i) = m*(c-x(i))/(1-p)^2*(1+x(i)/c-2*p);
-                dyc_dx(i) = (2*m/(1-p)^2)*(p-x(i)/c);
-            end
-        end
+    forward = x < p*c;
+
+    if p > 0 && p < 1
+        y_c(forward) = (m/p^2)*(2*p*(x(forward)/c) - (x(forward)/c).^2) * c;
+        dyc_dx(forward) = (2*m / p^2) * (p-x(forward)/c);
+
+        aft = ~forward;
+        y_c(aft) = (m/(1-p)^2) * ((1-2*p) + 2*p*(x(aft)/c)-(x(aft)/c).^2)*c;
+        dyc_dx(aft) = (2*m / (1-p)^2)*(p-x(aft)/c);
     end
 
     xi = atan(dyc_dx);
