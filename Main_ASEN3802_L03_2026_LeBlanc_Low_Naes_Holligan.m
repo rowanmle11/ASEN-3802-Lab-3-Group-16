@@ -166,9 +166,9 @@ x_axis = 1:length(alpha_vals);
 [xid2,yid2] = polyxpoly(x_axis,cl2,x_axis,c_intersect);
 [xid3,yid3] = polyxpoly(x_axis,cl3,x_axis,c_intersect);
 
-zero_lift_AOA1 = cl1(ceil(xid1))
-zero_lift_AOA2 = cl2(ceil(xid2))
-zero_lift_AOA3 = cl3(ceil(xid3))
+zero_lift_AOA1 = cl1(ceil(xid1));
+zero_lift_AOA2 = cl2(ceil(xid2));
+zero_lift_AOA3 = cl3(ceil(xid3));
 
 figure();
 hold on
