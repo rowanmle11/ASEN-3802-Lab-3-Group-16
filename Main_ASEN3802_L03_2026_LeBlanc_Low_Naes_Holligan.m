@@ -167,6 +167,7 @@ disp(table_slope)
 
 %% Task 4 Effect of Airfoil Camber on Lift
 
+% pull experimental data
 Airfoil2412Data=readmatrix("Airfoil2412Data.csv");
 Airfoil4412Data=readmatrix("Airfoil4412Data.csv");
 
@@ -179,6 +180,7 @@ cl1 = zeros(1,length(alpha_vals));
 cl2 = zeros(1,length(alpha_vals));
 cl3 = zeros(1,length(alpha_vals));
 
+% Run VPM
 for i = 1:length(alpha_vals)
 
     [x1,y1,xc1,yc1] = NACA_Airfoils(0,0,0.12,chord,N);
@@ -192,6 +194,7 @@ for i = 1:length(alpha_vals)
 
 end
 
+% Find zero-lift AOA
 c_intersect = zeros(1,length(alpha_vals));
 x_axis = 1:length(alpha_vals);
 
@@ -210,6 +213,7 @@ alpha_zero3 = interp1(1:length(alpha_vals), alpha_vals, xid3);
 cl_tat = 2*pi*(alpha_vals*pi/180);
 
 
+% Plot all lift slopes
 figure();
 hold on
 plot(alpha_vals,cl1, 'Color', 'b', 'LineWidth', 1)
@@ -240,9 +244,11 @@ Vortex_Results = [alpha_zero1; alpha_zero2; alpha_zero3];
 TAT_Results = [0; -2.08; -4.16];
 Exp_Results = [0; -2.1; -4.3];
 
+% Compare zero-lift AOA 
 ComparisonTable = table(airfoil_names, Vortex_Results, TAT_Results, Exp_Results, 'VariableNames', {'Airfoil', 'Vortex_Panel_deg', 'Thin_Airfoil_Theory_deg', 'Experimental_deg'});
 disp(ComparisonTable);
 
+% Calculate lift slopes
 linear_portion_VPM = (alpha_vals >= -3) & (alpha_vals <= 3);
 linear_portion_exp1 = (exp_0012(:,1) >= -3) & (exp_0012(:,1) <= 3);
 linear_portion_exp2 = (Airfoil2412Data(:,1) >= -3) & (Airfoil2412Data(:,1) <= 3);
@@ -266,6 +272,7 @@ lift_slope1_exp = fit1_exp(1);
 lift_slope2_exp = fit2_exp(1);
 lift_slope3_exp = fit3_exp(1);
 
+% Compare Lift Slopes
 SlopeTable = table(airfoil_names, [lift_slope1_VPM; lift_slope2_VPM; lift_slope3_VPM], ...
                    ones(3,1)*slope_theoretical, [lift_slope1_exp; lift_slope2_exp; lift_slope3_exp], ...
                    'VariableNames', {'Airfoil', 'Vortex_Panel', 'Thin_Airfoil_Theory', 'Experimental'});
