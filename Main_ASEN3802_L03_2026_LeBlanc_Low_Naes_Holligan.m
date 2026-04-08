@@ -252,9 +252,30 @@ title('C_{L} vs. \alpha', 'Interpreter', 'tex')
 
 hold off
 
-cl1_id = find(cl1 == 0, 1);
-cl2_id = find(cl2 == 0, 1);
-cl3_id = find(cl3 == 0, 1);
+Vortex_Results = [alpha_zero1; alpha_zero2; alpha_zero3];
+TAT_Results = [0; -2.08; -4.16];
+Exp_Results = [0; -2.1; -4.3];
+
+ComparisonTable = table(airfoil_names, Vortex_Results, TAT_Results, Exp_Results, 'VariableNames', {'Airfoil', 'Vortex_Panel_deg', 'Thin_Airfoil_Theory_deg', 'Experimental_deg'});
+disp(ComparisonTable);
+
+linear_portion = (alpha_vals >= -3) & (alpha_vals <= 3);
+
+fit1 = polyfit(alpha_vals(linear_portion), cl1(linear_portion), 1);
+fit2 = polyfit(alpha_vals(linear_portion), cl2(linear_portion), 1);
+fit3 = polyfit(alpha_vals(linear_portion), cl3(linear_portion), 1);
+
+lift_slope1 = fit1(1);
+lift_slope2 = fit2(1);
+lift_slope3 = fit3(1);
+
+slope_theoretical = (2 * pi) * pi / 180;
+
+SlopeTable = table(airfoil_names, [lift_slope1; lift_slope2; lift_slope3], ...
+                   ones(3,1)*slope_theoretical, [0.110; 0.110; 0.110], ...
+                   'VariableNames', {'Airfoil', 'Vortex_Panel', 'Thin_Airfoil_Theory', 'Experimental'});
+
+disp(SlopeTable);
 
 %% FUNCTIONS
 
