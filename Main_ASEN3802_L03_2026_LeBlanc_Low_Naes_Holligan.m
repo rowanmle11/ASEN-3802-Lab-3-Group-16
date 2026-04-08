@@ -103,6 +103,7 @@ cl_tat = a0*alpha;
 % Plots
 
 figure
+axis([-5,10,-1,1.5])
 hold on
 grid on
 plot(alpha,cl_tat,'k--','DisplayName','Thin Airfoil Theory')
@@ -112,6 +113,14 @@ plot(alpha,cl_panel(2,:),'r-','DisplayName','NACA 0012')
 plot(alpha,cl_panel(3,:),'g-','DisplayName','NACA 0018')
 
 % experimental data plots
+
+Airfoil0006Data=readmatrix("Airfoil0006Data.csv");
+Airfoil0012Data=readmatrix("Airfoil0012Data.csv");
+
+plot(Airfoil0006Data(:,1),Airfoil0006Data(:,2),'b--','DisplayName','NACA 0006 Experimental')
+plot(Airfoil0012Data(:,1),Airfoil0012Data(:,2),'r--','DisplayName','NACA 0012 Experimental')
+
+
 
 xlabel('Angle of Attack, \alpha (degrees)')
 ylabel('Sectional Lift Coefficient, c_l')
@@ -138,6 +147,9 @@ for i = 1:length(t)
 end
 
 %% Task 4 Effect of Airfoil Camber on Lift
+
+Airfoil2412Data=readmatrix("Airfoil2412Data.csv");
+Airfoil4412Data=readmatrix("Airfoil4412Data.csv");
 
 N = ceil(xid);
 
@@ -175,9 +187,16 @@ hold on
 plot(alpha_vals,cl1, 'Color', 'b', 'LineWidth', 2)
 plot(alpha_vals,cl2, 'Color', 'r', 'LineWidth', 2)
 plot(alpha_vals,cl3, 'Color', 'magenta', 'LineWidth', 2)
+
+plot(Airfoil0012Data(:,1),Airfoil0012Data(:,2),'b--')
+plot(Airfoil2412Data(:,1),Airfoil2412Data(:,2),'r--')
+plot(Airfoil4412Data(:,1),Airfoil4412Data(:,2),'--','Color', 'magenta')
+
+
+
 xlabel('AOA \alpha [Deg]', 'Interpreter', 'tex')
 ylabel('C_{L}')
-legend('NACA 0012', 'NACA 2412', 'NACA 4412', 'Location', 'Best')
+legend('NACA 0012', 'NACA 2412', 'NACA 4412','NACA 0012 Experimental', 'NACA 2412 Experimental', 'NACA 4412 Experimental', 'Location', 'Best')
 title('C_{L} vs. \alpha', 'Interpreter', 'tex')
 
 hold off
