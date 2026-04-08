@@ -16,8 +16,8 @@ N=50;
 figure
 hold on
 grid on
-plot(x1, y1, 'b-')
-plot(x2, y2, 'r-')
+plot(x1, y1, 'b.-', 'MarkerSize',8)
+plot(x2, y2, 'r.-', 'MarkerSize',8)
 plot(xcam,ycam,'k-')
 axis equal
 xlabel('x/c')
