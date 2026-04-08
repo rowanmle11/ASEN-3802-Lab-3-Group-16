@@ -103,7 +103,6 @@ end
 cl_tat = 2*pi*(alpha*pi/180);
 
 % Experimental Data
-has_exp_data = true;
 exp_0006 = readmatrix('Airfoil0006Data.csv');
 exp_0012 = readmatrix('Airfoil0012Data.csv');
 alpha_exp_0006 = exp_0006(:,1); cl_exp_0006 = exp_0006(:,2);
