@@ -32,7 +32,9 @@ title('NACA Airfoil Shape')
 
 alpha = 12;
 
-Num_Panels = 500;
+% Define max number of panels and run Vortex Panel Method for varying number of panels
+
+Num_Panels = 499;
 chord = 1;
 cl = zeros(1,Num_Panels);
     count = 0;
@@ -43,26 +45,26 @@ cl = zeros(1,Num_Panels);
         cl(i-1) = Vortex_Panel(x,y,alpha);
     end
 
+    % Find intersection of one-percent error line to define the minimum number of panels needed
+
 c_intersect = (cl(length(cl))- 0.01*cl(length(cl))) * ones(1,Num_Panels);
 x_axis = 2:Num_Panels+1;
 [xid,yid] = polyxpoly(x_axis,cl,x_axis,c_intersect);
 
-disp('Number of Panels to 1% error:')
-disp(ceil(xid))
-
+    % Plot the convergence study 
 figure();
 hold on
 grid on
 plot(x_axis,cl, 'LineWidth',2);
-xlabel('Number of Panels')
+xlabel('Number of Panels Per Side')
 ylabel('Cl Values')
 yline(cl(length(cl)) + 0.01*cl(length(cl)), 'r--')
 yline(cl(length(cl)) - 0.01*cl(length(cl)), 'r--')
 xline(ceil(xid),'k', 'LineWidth', 1.5);
 plot(ceil(xid),yid,'Marker','o','MarkerSize',8,'LineWidth',2,'Color','b');
 xlim([0,Num_Panels]);
-legend('C_{L}', '+1% C_{L final}','-1% C{L final}','Min Number of Panels = 29', '1% intersect','Interpreter', 'tex', 'Location','Best')
-title('Cl vs. Number of Panels')
+legend('C_{L}', '+1% C_{L final}','-1% C_{L final}','Min Number of Panels Per Side = 36', '1% intersect','Interpreter', 'tex', 'Location','Best')
+title('Cl vs. Number of Panels Per Side')
 hold off
 
 cl_exact = cl(end);
@@ -73,6 +75,7 @@ cl_pred = interp1(x_axis, cl, min_panels_pred);
 
 rel_error = abs(cl_pred - cl_exact)/abs(cl_exact);
 
+% Define table to compare exact vs one-percent
 Results = table(cl_exact, panels_exact, cl_pred, rel_error, min_panels_pred,'VariableNames', {'C_{L Exact}','Panels_Exact','C{L Predicted}','Relative_Error','Min_Panels_Predicted'});
 
 disp(Results)
