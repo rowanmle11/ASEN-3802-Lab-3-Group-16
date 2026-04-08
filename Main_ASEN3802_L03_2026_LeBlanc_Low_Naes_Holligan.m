@@ -202,9 +202,10 @@ essentially infinite.
 Airfoil2412Data=readmatrix("Airfoil2412Data.csv");
 Airfoil4412Data=readmatrix("Airfoil4412Data.csv");
 
+
 N = ceil(xid);
 
-alpha_vals = -100:100;
+alpha_vals = linspace(-100,100,500);
 chord = 1;
 cl1 = zeros(1,length(alpha_vals));
 cl2 = zeros(1,length(alpha_vals));
@@ -225,13 +226,19 @@ end
 
 c_intersect = zeros(1,length(alpha_vals));
 x_axis = 1:length(alpha_vals);
+
 [xid1,yid1] = polyxpoly(x_axis,cl1,x_axis,c_intersect);
 [xid2,yid2] = polyxpoly(x_axis,cl2,x_axis,c_intersect);
 [xid3,yid3] = polyxpoly(x_axis,cl3,x_axis,c_intersect);
 
-zero_lift_AOA1 = cl1(ceil(xid1));
-zero_lift_AOA2 = cl2(ceil(xid2));
-zero_lift_AOA3 = cl3(ceil(xid3));
+zero_lift_AOA1 = alpha_vals(floor(xid1));
+zero_lift_AOA2 = alpha_vals(ceil(xid2));
+zero_lift_AOA3 = alpha_vals(ceil(xid3));
+
+alpha_zero1 = interp1(1:length(alpha_vals), alpha_vals, xid1);
+alpha_zero2 = interp1(1:length(alpha_vals), alpha_vals, xid2);
+alpha_zero3 = interp1(1:length(alpha_vals), alpha_vals, xid3);
+
 
 figure();
 hold on
@@ -243,14 +250,16 @@ plot(exp_0012(:,1),exp_0012(:,2),'b--')
 plot(Airfoil2412Data(:,1),Airfoil2412Data(:,2),'r--')
 plot(Airfoil4412Data(:,1),Airfoil4412Data(:,2),'--','Color', 'magenta')
 
-
-
 xlabel('AOA \alpha [Deg]', 'Interpreter', 'tex')
 ylabel('C_{L}')
 legend('NACA 0012', 'NACA 2412', 'NACA 4412','NACA 0012 Experimental', 'NACA 2412 Experimental', 'NACA 4412 Experimental', 'Location', 'Best')
 title('C_{L} vs. \alpha', 'Interpreter', 'tex')
 
 hold off
+
+zero_lift_angles = [alpha_zero1; alpha_zero2; alpha_zero3];
+airfoil_names = {'NACA 0012'; 'NACA 2412'; 'NACA 4412'};
+
 
 Vortex_Results = [alpha_zero1; alpha_zero2; alpha_zero3];
 TAT_Results = [0; -2.08; -4.16];
