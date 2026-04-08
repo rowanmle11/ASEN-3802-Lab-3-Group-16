@@ -1,4 +1,4 @@
-% Contributors: Rowan LeBlanc, Landon Holligan
+% Contributors: Rowan LeBlanc, Landon Holligan, Erik Low
 
 clear;clc;close all
 
@@ -103,6 +103,7 @@ end
 cl_tat = 2*pi*(alpha*pi/180);
 
 % Experimental Data
+has_exp_data = true;
 exp_0006 = readmatrix('Airfoil0006Data.csv');
 exp_0012 = readmatrix('Airfoil0012Data.csv');
 alpha_exp_0006 = exp_0006(:,1); cl_exp_0006 = exp_0006(:,2);
@@ -205,7 +206,7 @@ plot(alpha_vals,cl1, 'Color', 'b', 'LineWidth', 2)
 plot(alpha_vals,cl2, 'Color', 'r', 'LineWidth', 2)
 plot(alpha_vals,cl3, 'Color', 'magenta', 'LineWidth', 2)
 
-plot(Airfoil0012Data(:,1),Airfoil0012Data(:,2),'b--')
+plot(exp_0012(:,1),exp_0012(:,2),'b--')
 plot(Airfoil2412Data(:,1),Airfoil2412Data(:,2),'r--')
 plot(Airfoil4412Data(:,1),Airfoil4412Data(:,2),'--','Color', 'magenta')
 
