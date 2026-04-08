@@ -1,4 +1,4 @@
-% Contributors: Rowan LeBlanc, Landon Holligan
+% Contributors: Rowan LeBlanc, Landon Holligan, Erik Low
 
 clear;clc;close all
 
