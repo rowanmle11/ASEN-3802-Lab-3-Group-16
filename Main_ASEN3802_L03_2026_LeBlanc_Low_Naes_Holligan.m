@@ -1,4 +1,4 @@
-% Contributors: Rowan LeBlanc, Landon Holligan, Erik Low
+% Contributors: Rowan LeBlanc, Landon Holligan
 
 clear;clc;close all
 
@@ -76,10 +76,7 @@ disp(Results)
 
 %% Task 3 Effect of Airfoil Thickness on Lift
 
-N = ceil(xid);
-if N < 10
-    N = 50;
-end
+N = 50;
 
 alpha = linspace(-15,15,100);
 chord = 1;
@@ -163,6 +160,42 @@ table_slope = table(airfoils,[slope_0006;slope_0012;slope_0018], ...
     [slope_tat;slope_tat;slope_tat],[slope_exp6;slope_exp12;slope_exp18], ...
     'VariableNames',{'Airfoil','Vortex_Panel','Thin_Airfoil_Theory','Experimental'});
 disp(table_slope)
+
+% Discussion
+
+%{
+As the thickness of the wing increases from the 0006 to the 0018, the
+sectional lift slope slightly increases according to the Vortex Panel
+Method. This behavior occurs because adding thickness changes the potential
+flow velocity distribution over the airfoil surface, leading to a higher
+circulation and steeper lift slope for a given angle of attack when
+compared to an infinitesimally thin plate.
+
+Thin airfoil theory assumes the wing section has zero thickness, treating
+all symmetric airfoils uniformly as a flat plate. This assumption is most
+accurate for the 0006 airfoil where the theoretical lift slope of 2*pi per
+radian most closely approximates both the VPM and experimental results.
+However as the wing section thickness increases from the 0012 to the 0018,
+the divergence betweenthe fixed 2*pi flat-plate assumption and the VPM
+results widens, making thin airfoil theory more invalid the thicker the
+airfoil gets.
+
+When comparing the theoretical models with the experimental data, both the
+thin airfoil theory and VPM capture the linear behavior at low angles of
+attack, but there are discrepancies. These mainly stem from the fact that
+both theoretical approaches neglect viscous effects. In reality a boundary
+layer forms laong the airfoil's surface. This layer slightly thickens the
+effective shape of the airfoil and changes the flow near the trailing edge,
+which typically reduces the measured lift slope slightly below the
+idealized inviscid predictions. This boundary layer separation also causes
+the experimental airfoils to stall at high angles of attack.
+
+Even though the experimental data was collected at finite Reynolds numbers 
+based on wind tunnel testing, both thin airfoil theory and VPM represent 
+inviscid and irrotational flow. Because they assume the fluid has 
+absolutely zero viscosity, the theoretical Reynolds number for both is 
+essentially infinite.
+%}
 
 %% Task 4 Effect of Airfoil Camber on Lift
 
@@ -414,5 +447,4 @@ GAMA = AN\RHS';
 CIRCULATION = sum(S.*V);
 CL = 2*CIRCULATION;
 
-%% 
 end
