@@ -48,6 +48,7 @@ disp(ceil(xid))
 
 figure();
 hold on
+grid on
 plot(x_axis,cl, 'LineWidth',2);
 xlabel('Number of Panels')
 ylabel('Cl Values')
@@ -80,7 +81,7 @@ disp(Results)
 
 N = ceil(xid);
 
-alpha_vals = -100:100;
+alpha_vals = linspace(-100,100,500);
 chord = 1;
 cl1 = zeros(1,length(alpha_vals));
 cl2 = zeros(1,length(alpha_vals));
@@ -101,31 +102,64 @@ end
 
 c_intersect = zeros(1,length(alpha_vals));
 x_axis = 1:length(alpha_vals);
+
 [xid1,yid1] = polyxpoly(x_axis,cl1,x_axis,c_intersect);
 [xid2,yid2] = polyxpoly(x_axis,cl2,x_axis,c_intersect);
 [xid3,yid3] = polyxpoly(x_axis,cl3,x_axis,c_intersect);
 
-zero_lift_AOA1 = cl1(ceil(xid1))
-zero_lift_AOA2 = cl2(ceil(xid2))
-zero_lift_AOA3 = cl3(ceil(xid3))
+zero_lift_AOA1 = alpha_vals(floor(xid1));
+zero_lift_AOA2 = alpha_vals(ceil(xid2));
+zero_lift_AOA3 = alpha_vals(ceil(xid3));
+
+alpha_zero1 = interp1(1:length(alpha_vals), alpha_vals, xid1);
+alpha_zero2 = interp1(1:length(alpha_vals), alpha_vals, xid2);
+alpha_zero3 = interp1(1:length(alpha_vals), alpha_vals, xid3);
 
 figure();
 hold on
+grid on;
 plot(alpha_vals,cl1, 'Color', 'b', 'LineWidth', 2)
 plot(alpha_vals,cl2, 'Color', 'r', 'LineWidth', 2)
 plot(alpha_vals,cl3, 'Color', 'magenta', 'LineWidth', 2)
+yline(0,'LineWidth', 2, 'LineStyle','--');
+plot(alpha_zero1,yid1,'Marker','o','MarkerSize',8,'LineWidth',2,'Color','b');
+plot(alpha_zero2,yid2,'Marker','o','MarkerSize',8,'LineWidth',2,'Color','b');
+plot(alpha_zero3,yid3,'Marker','o','MarkerSize',8,'LineWidth',2,'Color','b');
+
+zero_lift_angles = [alpha_zero1; alpha_zero2; alpha_zero3];
+airfoil_names = {'NACA 0012'; 'NACA 2412'; 'NACA 4412'};
+
 xlabel('AOA \alpha [Deg]', 'Interpreter', 'tex')
 ylabel('C_{L}')
-legend('NACA 0012', 'NACA 2412', 'NACA 4412', 'Location', 'Best')
+legend('NACA 0012', 'NACA 2412', 'NACA 4412', '0 Lift Line','0 Lift AOA','Location', 'Best')
 title('C_{L} vs. \alpha', 'Interpreter', 'tex')
 
 hold off
 
-cl1_id = find(cl1 == 0, 1);
-cl2_id = find(cl2 == 0, 1);
-cl3_id = find(cl3 == 0, 1);
+Vortex_Results = [alpha_zero1; alpha_zero2; alpha_zero3];
+TAT_Results = [0; -2.08; -4.16];
+Exp_Results = [0; -2.1; -4.3];
 
+ComparisonTable = table(airfoil_names, Vortex_Results, TAT_Results, Exp_Results, 'VariableNames', {'Airfoil', 'Vortex_Panel_deg', 'Thin_Airfoil_Theory_deg', 'Experimental_deg'});
+disp(ComparisonTable);
 
+linear_portion = (alpha_vals >= -3) & (alpha_vals <= 3);
+
+fit1 = polyfit(alpha_vals(linear_portion), cl1(linear_portion), 1);
+fit2 = polyfit(alpha_vals(linear_portion), cl2(linear_portion), 1);
+fit3 = polyfit(alpha_vals(linear_portion), cl3(linear_portion), 1);
+
+lift_slope1 = fit1(1);
+lift_slope2 = fit2(1);
+lift_slope3 = fit3(1);
+
+slope_theoretical = (2 * pi) * pi / 180;
+
+SlopeTable = table(airfoil_names, [lift_slope1; lift_slope2; lift_slope3], ...
+                   ones(3,1)*slope_theoretical, [0.110; 0.110; 0.110], ...
+                   'VariableNames', {'Airfoil', 'Vortex_Panel', 'Thin_Airfoil_Theory', 'Experimental'});
+
+disp(SlopeTable);
 
 %%
 function [x_b, y_b, x, y_c] = NACA_Airfoils(m,p,t,c,N)
