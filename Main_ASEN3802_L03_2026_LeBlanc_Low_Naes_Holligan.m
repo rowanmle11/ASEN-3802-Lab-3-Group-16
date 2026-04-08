@@ -203,21 +203,28 @@ alpha_zero1 = interp1(1:length(alpha_vals), alpha_vals, xid1);
 alpha_zero2 = interp1(1:length(alpha_vals), alpha_vals, xid2);
 alpha_zero3 = interp1(1:length(alpha_vals), alpha_vals, xid3);
 
+cl_tat = 2*pi*(alpha_vals*pi/180);
+
 
 figure();
 hold on
-plot(alpha_vals,cl1, 'Color', 'b', 'LineWidth', 2)
-plot(alpha_vals,cl2, 'Color', 'r', 'LineWidth', 2)
-plot(alpha_vals,cl3, 'Color', 'magenta', 'LineWidth', 2)
+plot(alpha_vals,cl1, 'Color', 'b', 'LineWidth', 1)
+plot(alpha_vals,cl2, 'Color', 'r', 'LineWidth', 1)
+plot(alpha_vals,cl3, 'Color', 'magenta', 'LineWidth', 1)
 
-plot(exp_0012(:,1),exp_0012(:,2),'b--')
-plot(Airfoil2412Data(:,1),Airfoil2412Data(:,2),'r--')
-plot(Airfoil4412Data(:,1),Airfoil4412Data(:,2),'--','Color', 'magenta')
+plot(exp_0012(:,1),exp_0012(:,2),'b--', 'LineWidth', 2)
+plot(Airfoil2412Data(:,1),Airfoil2412Data(:,2),'r--', 'LineWidth', 2)
+plot(Airfoil4412Data(:,1),Airfoil4412Data(:,2),'--','Color', 'magenta', 'LineWidth', 2)
+
+plot(alpha_vals,cl_tat,'k--','LineWidth',1.5)
 
 xlabel('AOA \alpha [Deg]', 'Interpreter', 'tex')
 ylabel('C_{L}')
-legend('NACA 0012', 'NACA 2412', 'NACA 4412','NACA 0012 Experimental', 'NACA 2412 Experimental', 'NACA 4412 Experimental', 'Location', 'Best')
+legend('NACA 0012', 'NACA 2412', 'NACA 4412','NACA 0012 Experimental', 'NACA 2412 Experimental', 'NACA 4412 Experimental', 'Thin Airfoil Theory', 'Location', 'Best')
 title('C_{L} vs. \alpha', 'Interpreter', 'tex')
+
+xlim([-25,25])
+ylim([-2,2])
 
 hold off
 
@@ -232,20 +239,31 @@ Exp_Results = [0; -2.1; -4.3];
 ComparisonTable = table(airfoil_names, Vortex_Results, TAT_Results, Exp_Results, 'VariableNames', {'Airfoil', 'Vortex_Panel_deg', 'Thin_Airfoil_Theory_deg', 'Experimental_deg'});
 disp(ComparisonTable);
 
-linear_portion = (alpha_vals >= -3) & (alpha_vals <= 3);
+linear_portion_VPM = (alpha_vals >= -3) & (alpha_vals <= 3);
+linear_portion_exp1 = (exp_0012(:,1) >= -3) & (exp_0012(:,1) <= 3);
+linear_portion_exp2 = (Airfoil2412Data(:,1) >= -3) & (Airfoil2412Data(:,1) <= 3);
+linear_portion_exp3 = (Airfoil4412Data(:,1) >= -3) & (Airfoil4412Data(:,1) <= 3);
 
-fit1 = polyfit(alpha_vals(linear_portion), cl1(linear_portion), 1);
-fit2 = polyfit(alpha_vals(linear_portion), cl2(linear_portion), 1);
-fit3 = polyfit(alpha_vals(linear_portion), cl3(linear_portion), 1);
+fit1_VPM = polyfit(alpha_vals(linear_portion_VPM), cl1(linear_portion_VPM), 1);
+fit2_VPM = polyfit(alpha_vals(linear_portion_VPM), cl2(linear_portion_VPM), 1);
+fit3_VPM = polyfit(alpha_vals(linear_portion_VPM), cl3(linear_portion_VPM), 1);
 
-lift_slope1 = fit1(1);
-lift_slope2 = fit2(1);
-lift_slope3 = fit3(1);
+fit1_exp = polyfit(exp_0012(linear_portion_exp1,1), exp_0012(linear_portion_exp1,2),1);
+fit2_exp = polyfit(Airfoil2412Data(linear_portion_exp2,1), Airfoil2412Data(linear_portion_exp2,2), 1);
+fit3_exp = polyfit(Airfoil4412Data(linear_portion_exp3,1), Airfoil4412Data(linear_portion_exp3,2), 1);
+
+lift_slope1_VPM = fit1_VPM(1);
+lift_slope2_VPM = fit2_VPM(1);
+lift_slope3_VPM = fit3_VPM(1);
 
 slope_theoretical = (2 * pi) * pi / 180;
 
-SlopeTable = table(airfoil_names, [lift_slope1; lift_slope2; lift_slope3], ...
-                   ones(3,1)*slope_theoretical, [0.110; 0.110; 0.110], ...
+lift_slope1_exp = fit1_exp(1);
+lift_slope2_exp = fit2_exp(1);
+lift_slope3_exp = fit3_exp(1);
+
+SlopeTable = table(airfoil_names, [lift_slope1_VPM; lift_slope2_VPM; lift_slope3_VPM], ...
+                   ones(3,1)*slope_theoretical, [lift_slope1_exp; lift_slope2_exp; lift_slope3_exp], ...
                    'VariableNames', {'Airfoil', 'Vortex_Panel', 'Thin_Airfoil_Theory', 'Experimental'});
 
 disp(SlopeTable);
