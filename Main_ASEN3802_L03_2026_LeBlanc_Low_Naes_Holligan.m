@@ -1,6 +1,6 @@
-% ASEN 3802 Lab 3 Part 1: Analysis of 2D Airfoils
+%% ASEN 3802 Lab 3 Part 1: Analysis of 2D Airfoils
 % 
-% Contributors: Rowan LeBlanc, Landon Holligan, Erik Low
+% Contributors: Rowan LeBlanc, Landon Holligan, Erik Low, Finn Naes
 % Date: April 8, 2026
 
 clear;clc;close all
@@ -32,9 +32,7 @@ title('NACA Airfoil Shape')
 
 alpha = 12;
 
-% Define max number of panels and run Vortex Panel Method for varying number of panels
-
-Num_Panels = 499;
+Num_Panels = 500;
 chord = 1;
 cl = zeros(1,Num_Panels);
     count = 0;
@@ -45,26 +43,26 @@ cl = zeros(1,Num_Panels);
         cl(i-1) = Vortex_Panel(x,y,alpha);
     end
 
-    % Find intersection of one-percent error line to define the minimum number of panels needed
-
 c_intersect = (cl(length(cl))- 0.01*cl(length(cl))) * ones(1,Num_Panels);
 x_axis = 2:Num_Panels+1;
 [xid,yid] = polyxpoly(x_axis,cl,x_axis,c_intersect);
 
-    % Plot the convergence study 
+disp('Number of Panels to 1% error:')
+disp(ceil(xid))
+
 figure();
 hold on
 grid on
 plot(x_axis,cl, 'LineWidth',2);
-xlabel('Number of Panels Per Side')
+xlabel('Number of Panels')
 ylabel('Cl Values')
 yline(cl(length(cl)) + 0.01*cl(length(cl)), 'r--')
 yline(cl(length(cl)) - 0.01*cl(length(cl)), 'r--')
 xline(ceil(xid),'k', 'LineWidth', 1.5);
 plot(ceil(xid),yid,'Marker','o','MarkerSize',8,'LineWidth',2,'Color','b');
 xlim([0,Num_Panels]);
-legend('C_{L}', '+1% C_{L final}','-1% C_{L final}','Min Number of Panels Per Side = 36', '1% intersect','Interpreter', 'tex', 'Location','Best')
-title('Cl vs. Number of Panels Per Side')
+legend('C_{L}', '+1% C_{L final}','-1% C{L final}','Min Number of Panels = 29', '1% intersect','Interpreter', 'tex', 'Location','Best')
+title('Cl vs. Number of Panels')
 hold off
 
 cl_exact = cl(end);
@@ -75,7 +73,6 @@ cl_pred = interp1(x_axis, cl, min_panels_pred);
 
 rel_error = abs(cl_pred - cl_exact)/abs(cl_exact);
 
-% Define table to compare exact vs one-percent
 Results = table(cl_exact, panels_exact, cl_pred, rel_error, min_panels_pred,'VariableNames', {'C_{L Exact}','Panels_Exact','C{L Predicted}','Relative_Error','Min_Panels_Predicted'});
 
 disp(Results)
@@ -91,7 +88,6 @@ cl_0006 = zeros(1,length(alpha));
 cl_0012 = zeros(1,length(alpha));
 cl_0018 = zeros(1,length(alpha));
 
-% Run VPM for all airfoils
 for i = 1:length(alpha)
     [x1,y1,~,~] = NACA_Airfoils(0,0,0.06,chord,N);
     cl_0006(i) = Vortex_Panel(x1,y1,alpha(i));
@@ -171,7 +167,6 @@ disp(table_slope)
 
 %% Task 4 Effect of Airfoil Camber on Lift
 
-% Pull expirimental data
 Airfoil2412Data=readmatrix("Airfoil2412Data.csv");
 Airfoil4412Data=readmatrix("Airfoil4412Data.csv");
 
@@ -184,7 +179,6 @@ cl1 = zeros(1,length(alpha_vals));
 cl2 = zeros(1,length(alpha_vals));
 cl3 = zeros(1,length(alpha_vals));
 
-% Run VPM 
 for i = 1:length(alpha_vals)
 
     [x1,y1,xc1,yc1] = NACA_Airfoils(0,0,0.12,chord,N);
@@ -197,8 +191,6 @@ for i = 1:length(alpha_vals)
     cl3(i) = Vortex_Panel(x3,y3,alpha_vals(i));
 
 end
-
-% Find zero-lift AOA
 
 c_intersect = zeros(1,length(alpha_vals));
 x_axis = 1:length(alpha_vals);
@@ -218,7 +210,6 @@ alpha_zero3 = interp1(1:length(alpha_vals), alpha_vals, xid3);
 cl_tat = 2*pi*(alpha_vals*pi/180);
 
 
-% Plot all lift slopes 
 figure();
 hold on
 plot(alpha_vals,cl1, 'Color', 'b', 'LineWidth', 1)
@@ -243,6 +234,7 @@ hold off
 
 zero_lift_angles = [alpha_zero1; alpha_zero2; alpha_zero3];
 airfoil_names = {'NACA 0012'; 'NACA 2412'; 'NACA 4412'};
+
 
 Vortex_Results = [alpha_zero1; alpha_zero2; alpha_zero3];
 TAT_Results = [0; -2.08; -4.16];
@@ -280,11 +272,10 @@ SlopeTable = table(airfoil_names, [lift_slope1_VPM; lift_slope2_VPM; lift_slope3
 
 disp(SlopeTable);
 
-
 %% FUNCTIONS
 
 function [x_b, y_b, x, y_c] = NACA_Airfoils(m,p,t,c,N)
-%{ Constructs panels for any NACA 4-digit airfoil.
+% Constructs panels for any NACA 4-digit airfoil.
 % 
 % Inputs: max camber (m), max camber location (p), max thickness (t), chord
 % length (c), number of panels (N).
@@ -295,7 +286,6 @@ function [x_b, y_b, x, y_c] = NACA_Airfoils(m,p,t,c,N)
 % Clusters points more tightly at LE and TE using equiangular spacing.
 %
 % Outputs: x_b, y_b (x- and y- coords of airfoils surface boundary points)
-%}
 
     % cosine (equiangular spacing)
     beta = linspace(0,pi,N+1);
