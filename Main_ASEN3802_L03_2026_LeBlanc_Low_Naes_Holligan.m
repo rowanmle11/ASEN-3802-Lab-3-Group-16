@@ -1,18 +1,17 @@
-% Contributors: Rowan LeBlanc
+% Contributors: Rowan LeBlanc, Landon Holligan
 
 clear;clc;close all
 
 %% Task 1 NACA 4-Digit Airfoil Generator
 
 c=1;
-N=100;
+N=50;
 
 % NACA 0021
 [x1,y1,xc_0021,yc_0021] = NACA_Airfoils(0,0,0.21,c,N);
 
 % NACA 2421
 [x2,y2,xcam,ycam] = NACA_Airfoils(0.02,0.4,0.21,c,N);
-
 
 figure
 hold on
@@ -50,6 +49,7 @@ disp(ceil(xid))
 
 figure();
 hold on
+grid on
 plot(x_axis,cl, 'LineWidth',2);
 xlabel('Number of Panels')
 ylabel('Cl Values')
@@ -76,75 +76,93 @@ disp(Results)
 
 %% Task 3 Effect of Airfoil Thickness on Lift
 
-alpha = -5:1:10;
-N = 50;
-c = 1;
+N = ceil(xid);
+if N < 10
+    N = 50;
+end
 
-airfoils = {'NACA0006','NACA0012','NACA0018'};
-t = [0.06,0.12,0.18];
-m = 0;
-p = 0;
+alpha = linspace(-15,15,100);
+chord = 1;
 
-cl_panel = zeros(length(t),length(alpha));
+cl_0006 = zeros(1,length(alpha));
+cl_0012 = zeros(1,length(alpha));
+cl_0018 = zeros(1,length(alpha));
 
-for i=1:length(t)
-    [xb,yb,~,~] = NACA_Airfoils(m,p,t(i),c,N);
-    for j=1:length(alpha)
-        cl_panel(i,j) = Vortex_Panel(xb,yb,alpha(j));
-    end
+for i = 1:length(alpha)
+    [x1,y1,~,~] = NACA_Airfoils(0,0,0.06,chord,N);
+    cl_0006(i) = Vortex_Panel(x1,y1,alpha(i));
+
+    [x2,y2,~,~] = NACA_Airfoils(0,0,0.12,chord,N);
+    cl_0012(i) = Vortex_Panel(x2,y2,alpha(i));
+    
+    [x3,y3,~,~] = NACA_Airfoils(0,0,0.18,chord,N);
+    cl_0018(i) = Vortex_Panel(x3,y3,alpha(i));
 end
 
 % Thin Airfoil Theory
-a0 = 2*pi*(pi/180);
-cl_tat = a0*alpha;
+cl_tat = 2*pi*(alpha*pi/180);
 
 % Experimental Data
+has_exp_data = true;
+exp_0006 = readmatrix('Airfoil0006Data.csv');
+exp_0012 = readmatrix('Airfoil0012Data.csv');
+alpha_exp_0006 = exp_0006(:,1); cl_exp_0006 = exp_0006(:,2);
+alpha_exp_0012 = exp_0012(:,1); cl_exp_0012 = exp_0012(:,2);
 
-% Plots
-
+% plot
 figure
-axis([-5,10,-1,1.5])
 hold on
 grid on
-plot(alpha,cl_tat,'k--','DisplayName','Thin Airfoil Theory')
+plot(alpha,cl_0006,'b-')
+plot(alpha,cl_0012,'r-')
+plot(alpha,cl_0018,'g-')
 
-plot(alpha,cl_panel(1,:),'b-','DisplayName','NACA 0006')
-plot(alpha,cl_panel(2,:),'r-','DisplayName','NACA 0012')
-plot(alpha,cl_panel(3,:),'g-','DisplayName','NACA 0018')
+plot(alpha,cl_tat,'k--')
 
-% experimental data plots
-
-Airfoil0006Data=readmatrix("Airfoil0006Data.csv");
-Airfoil0012Data=readmatrix("Airfoil0012Data.csv");
-
-plot(Airfoil0006Data(:,1),Airfoil0006Data(:,2),'b--','DisplayName','NACA 0006 Experimental')
-plot(Airfoil0012Data(:,1),Airfoil0012Data(:,2),'r--','DisplayName','NACA 0012 Experimental')
-
-
-
-xlabel('Angle of Attack, \alpha (degrees)')
-ylabel('Sectional Lift Coefficient, c_l')
-title('Effect of Airfoil Thcikness on Lift Coefficient')
-legend('Location','best')
+plot(alpha_exp_0006,cl_exp_0006,'bo')
+plot(alpha_exp_0012,cl_exp_0012,'ro')
+legend('NACA 0006','NACA 0012','NACA 0018','Thin Airfoil Theory','NACA 0006 Exp','NACA 0012 Exp','Location','best')
+xlabel('Angle of Attack \alpha [Deg]','Interpreter','tex')
+ylabel('Sectional Lift COefficient C_l','Interpreter','tex')
+title('Effect of Airfoil Thickness on Lift Coefficient')
+ylim([-5 5])
 hold off
 
-linear_idx = find(alpha >= -5 & alpha <= 5);
+lin_idx = (alpha >= -3) & (alpha <= 3);
 
-fprintf('\nZero-Lift AoA (degrees):\n')
-fprintf('%-15s | %-15s | %-15s | %-15s\n','Airfoil','TAT','Vortex Panel','Experimental')
-fprintf(repmat('-',1,65),'\n')
+fit_0006 = polyfit(alpha(lin_idx),cl_0006(lin_idx),1);
+fit_0012 = polyfit(alpha(lin_idx),cl_0012(lin_idx),1);
+fit_0018 = polyfit(alpha(lin_idx),cl_0018(lin_idx),1);
 
-fprintf('\nLift Slope (1/degrees):\n')
-fprintf('%-15s | %-15s | %-15s | %-15s\n','Airfoil','TAT','Vortex Panel','Experimental')
-fprintf(repmat('-',1,65),'\n')
+slope_0006 = fit_0006(1); a0_0006 = -fit_0006(2)/fit_0006(1);
+slope_0012 = fit_0012(1); a0_0012 = -fit_0012(2)/fit_0012(1);
+slope_0018 = fit_0018(1); a0_0018 = -fit_0018(2)/fit_0018(1);
 
-for i = 1:length(t)
-    P_panel = polyfit(alpha(linear_idx),cl_panel(i,linear_idx),1);
-    slope_panel = P_panel(1);
-    alpha_L0_panel = -P_panel(2)/P_panel(1);
+slope_tat = 2*pi*(pi/180);
+a0_tat = 0;
 
-    fprintf('\n%-15s | %-15.2f | %-15.2f | %-15s\n',airfoils{i},0,alpha_L0_panel,' ')
-end
+lin_exp6 = (alpha_exp_0006 >= -3) & (alpha_exp_0006 <= 3);
+fit_exp6 = polyfit(alpha_exp_0006(lin_exp6),cl_exp_0006(lin_exp6),1);
+slope_exp6 = fit_exp6(1); a0_exp6 = -fit_exp6(2)/fit_exp6(1);
+
+lin_exp12 = (alpha_exp_0012 >= -3) & (alpha_exp_0012 <= 3);
+fit_exp12 = polyfit(alpha_exp_0012(lin_exp12),cl_exp_0012(lin_exp12),1);
+slope_exp12 = fit_exp12(1); a0_exp12 = -fit_exp12(2)/fit_exp12(1);
+
+slope_exp18 = NaN; a0_exp18 = NaN;
+
+airfoils = {'NACA 0006';'NACA 0012';'NACA 0018'};
+
+disp('Zero Lift Angle of Attack (Degrees')
+table_aoa = table(airfoils,[a0_0006;a0_0012;a0_0018], ...
+    [a0_tat;a0_tat;a0_tat],[a0_exp6;a0_exp12;a0_exp18], ...
+    'VariableNames',{'Airfoil','Vortex_Panel_deg','Thin_Airfoil_Theory_deg','Experimental_deg'});
+disp(table_aoa)
+
+table_slope = table(airfoils,[slope_0006;slope_0012;slope_0018], ...
+    [slope_tat;slope_tat;slope_tat],[slope_exp6;slope_exp12;slope_exp18], ...
+    'VariableNames',{'Airfoil','Vortex_Panel','Thin_Airfoil_Theory','Experimental'});
+disp(table_slope)
 
 %% Task 4 Effect of Airfoil Camber on Lift
 
@@ -218,15 +236,24 @@ function [x_b, y_b, x, y_c] = NACA_Airfoils(m,p,t,c,N)
     y_c = zeros(size(x));
     dyc_dx = zeros(size(x));
 
-    forward = x < p*c;
-
-    if p > 0 && p < 1
-        y_c(forward) = (m/p^2)*(2*p*(x(forward)/c) - (x(forward)/c).^2) * c;
-        dyc_dx(forward) = (2*m / p^2) * (p-x(forward)/c);
-
-        aft = ~forward;
-        y_c(aft) = (m/(1-p)^2) * ((1-2*p) + 2*p*(x(aft)/c)-(x(aft)/c).^2)*c;
-        dyc_dx(aft) = (2*m / (1-p)^2)*(p-x(aft)/c);
+    for i = 1:length(x)
+        if x(i) < p*c
+            if p == 0
+                y_c(i) = 0;
+                dyc_dx(i) = 0;
+            else
+                y_c(i) = m*(x(i)/p^2)*(2*p-x(i)/c);
+                dyc_dx(i) = (2*m/p^2)*(p-x(i)/c);
+            end
+        else
+            if p == 1
+                y_c(i) = 0;
+                dyc_dx(i) = 0;
+            else
+                y_c(i) = m*(c-x(i))/(1-p)^2*(1+x(i)/c-2*p);
+                dyc_dx(i) = (2*m/(1-p)^2)*(p-x(i)/c);
+            end
+        end
     end
 
     xi = atan(dyc_dx);
@@ -387,4 +414,5 @@ GAMA = AN\RHS';
 CIRCULATION = sum(S.*V);
 CL = 2*CIRCULATION;
 
+%% 
 end
