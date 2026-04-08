@@ -91,6 +91,7 @@ cl_0006 = zeros(1,length(alpha));
 cl_0012 = zeros(1,length(alpha));
 cl_0018 = zeros(1,length(alpha));
 
+% Run VPM for all airfoils
 for i = 1:length(alpha)
     [x1,y1,~,~] = NACA_Airfoils(0,0,0.06,chord,N);
     cl_0006(i) = Vortex_Panel(x1,y1,alpha(i));
@@ -170,6 +171,7 @@ disp(table_slope)
 
 %% Task 4 Effect of Airfoil Camber on Lift
 
+% Pull expirimental data
 Airfoil2412Data=readmatrix("Airfoil2412Data.csv");
 Airfoil4412Data=readmatrix("Airfoil4412Data.csv");
 
@@ -182,6 +184,7 @@ cl1 = zeros(1,length(alpha_vals));
 cl2 = zeros(1,length(alpha_vals));
 cl3 = zeros(1,length(alpha_vals));
 
+% Run VPM 
 for i = 1:length(alpha_vals)
 
     [x1,y1,xc1,yc1] = NACA_Airfoils(0,0,0.12,chord,N);
@@ -194,6 +197,8 @@ for i = 1:length(alpha_vals)
     cl3(i) = Vortex_Panel(x3,y3,alpha_vals(i));
 
 end
+
+% Find zero-lift AOA
 
 c_intersect = zeros(1,length(alpha_vals));
 x_axis = 1:length(alpha_vals);
@@ -213,6 +218,7 @@ alpha_zero3 = interp1(1:length(alpha_vals), alpha_vals, xid3);
 cl_tat = 2*pi*(alpha_vals*pi/180);
 
 
+% Plot all lift slopes 
 figure();
 hold on
 plot(alpha_vals,cl1, 'Color', 'b', 'LineWidth', 1)
@@ -237,7 +243,6 @@ hold off
 
 zero_lift_angles = [alpha_zero1; alpha_zero2; alpha_zero3];
 airfoil_names = {'NACA 0012'; 'NACA 2412'; 'NACA 4412'};
-
 
 Vortex_Results = [alpha_zero1; alpha_zero2; alpha_zero3];
 TAT_Results = [0; -2.08; -4.16];
@@ -274,6 +279,7 @@ SlopeTable = table(airfoil_names, [lift_slope1_VPM; lift_slope2_VPM; lift_slope3
                    'VariableNames', {'Airfoil', 'Vortex_Panel', 'Thin_Airfoil_Theory', 'Experimental'});
 
 disp(SlopeTable);
+
 
 %% FUNCTIONS
 
