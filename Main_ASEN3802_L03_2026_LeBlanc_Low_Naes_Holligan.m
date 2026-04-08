@@ -1,10 +1,9 @@
-%% ASEN 3802 - Aerodynamics Lab
+% ASEN 3802 Lab 3 Part 1: Analysis of 2D Airfoils
+% 
 % Contributors: Rowan LeBlanc, Landon Holligan, Erik Low
-% Date: 04/08/2026
+% Date: April 8, 2026
 
-clear;
-clc;
-close all
+clear;clc;close all
 
 %% Task 1 NACA 4-Digit Airfoil Generator
 
@@ -17,7 +16,6 @@ N=50;
 % NACA 2421
 [x2,y2,xcam,ycam] = NACA_Airfoils(0.02,0.4,0.21,c,N);
 
-% Plot image of both NACA airfoils
 figure
 hold on
 grid on
@@ -34,9 +32,7 @@ title('NACA Airfoil Shape')
 
 alpha = 12;
 
-% Define max number of panels and run Vortex Panel Method for varying number of panels
-
-Num_Panels = 499;
+Num_Panels = 500;
 chord = 1;
 cl = zeros(1,Num_Panels);
     count = 0;
@@ -47,25 +43,26 @@ cl = zeros(1,Num_Panels);
         cl(i-1) = Vortex_Panel(x,y,alpha);
     end
 
-    % Find intersection of one-percent error line to define the minimum number of panels needed
-
 c_intersect = (cl(length(cl))- 0.01*cl(length(cl))) * ones(1,Num_Panels);
 x_axis = 2:Num_Panels+1;
 [xid,yid] = polyxpoly(x_axis,cl,x_axis,c_intersect);
+
+disp('Number of Panels to 1% error:')
+disp(ceil(xid))
 
 figure();
 hold on
 grid on
 plot(x_axis,cl, 'LineWidth',2);
-xlabel('Number of Panels Per Side')
+xlabel('Number of Panels')
 ylabel('Cl Values')
 yline(cl(length(cl)) + 0.01*cl(length(cl)), 'r--')
 yline(cl(length(cl)) - 0.01*cl(length(cl)), 'r--')
 xline(ceil(xid),'k', 'LineWidth', 1.5);
 plot(ceil(xid),yid,'Marker','o','MarkerSize',8,'LineWidth',2,'Color','b');
 xlim([0,Num_Panels]);
-legend('C_{L}', '+1% C_{L final}','-1% C_{L final}','Min Number of Panels Per Side = 36', '1% intersect','Interpreter', 'tex', 'Location','Best')
-title('Cl vs. Number of Panels Per Side')
+legend('C_{L}', '+1% C_{L final}','-1% C{L final}','Min Number of Panels = 29', '1% intersect','Interpreter', 'tex', 'Location','Best')
+title('Cl vs. Number of Panels')
 hold off
 
 cl_exact = cl(end);
@@ -278,6 +275,18 @@ disp(SlopeTable);
 %% FUNCTIONS
 
 function [x_b, y_b, x, y_c] = NACA_Airfoils(m,p,t,c,N)
+%{ Constructs panels for any NACA 4-digit airfoil.
+% 
+% Inputs: max camber (m), max camber location (p), max thickness (t), chord
+% length (c), number of panels (N).
+% 
+% Calculates shape by determining mean camber and applying thickness
+% distribution perpendicular to camber.
+%
+% Clusters points more tightly at LE and TE using equiangular spacing.
+%
+% Outputs: x_b, y_b (x- and y- coords of airfoils surface boundary points)
+%}
 
     % cosine (equiangular spacing)
     beta = linspace(0,pi,N+1);
