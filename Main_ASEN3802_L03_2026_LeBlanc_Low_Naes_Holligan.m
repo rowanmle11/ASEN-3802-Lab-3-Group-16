@@ -150,12 +150,13 @@ slope_exp18 = NaN; a0_exp18 = NaN;
 
 airfoils = {'NACA 0006';'NACA 0012';'NACA 0018'};
 
-disp('Zero Lift Angle of Attack (Degrees')
+disp('Zero Lift Angle of Attack (Degrees)')
 table_aoa = table(airfoils,[a0_0006;a0_0012;a0_0018], ...
     [a0_tat;a0_tat;a0_tat],[a0_exp6;a0_exp12;a0_exp18], ...
     'VariableNames',{'Airfoil','Vortex_Panel_deg','Thin_Airfoil_Theory_deg','Experimental_deg'});
 disp(table_aoa)
 
+disp('Sectional Lift Coefficient (1/Degree)')
 table_slope = table(airfoils,[slope_0006;slope_0012;slope_0018], ...
     [slope_tat;slope_tat;slope_tat],[slope_exp6;slope_exp12;slope_exp18], ...
     'VariableNames',{'Airfoil','Vortex_Panel','Thin_Airfoil_Theory','Experimental'});
