@@ -11,10 +11,10 @@ c=1;
 N=50;
 
 % NACA 0021
-[x1,y1,xc_0021,yc_0021] = NACA_Airfoils(0,0,0.21,c,N);
+[x1,y1,xc_0021,yc_0021] = NACA_Airfoils(0,0,0.21,c,N); % NACA 0021
 
 % NACA 2421
-[x2,y2,xcam,ycam] = NACA_Airfoils(0.02,0.4,0.21,c,N);
+[x2,y2,xcam,ycam] = NACA_Airfoils(0.02,0.4,0.21,c,N); % NACA 2421
 
 figure
 hold on
@@ -79,7 +79,7 @@ disp(Results)
 
 %% Task 3 Effect of Airfoil Thickness on Lift
 
-N = 50;
+N = 50; % 100 total, 50 per side
 
 alpha = linspace(-15,15,100);
 chord = 1;
@@ -88,6 +88,7 @@ cl_0006 = zeros(1,length(alpha));
 cl_0012 = zeros(1,length(alpha));
 cl_0018 = zeros(1,length(alpha));
 
+% Vortex Panel Method
 for i = 1:length(alpha)
     [x1,y1,~,~] = NACA_Airfoils(0,0,0.06,chord,N);
     cl_0006(i) = Vortex_Panel(x1,y1,alpha(i));
@@ -102,8 +103,7 @@ end
 % Thin Airfoil Theory
 cl_tat = 2*pi*(alpha*pi/180);
 
-% Experimental Data
-has_exp_data = true;
+% Pulling Experimental Data
 exp_0006 = readmatrix('Airfoil0006Data.csv');
 exp_0012 = readmatrix('Airfoil0012Data.csv');
 alpha_exp_0006 = exp_0006(:,1); cl_exp_0006 = exp_0006(:,2);
@@ -128,6 +128,7 @@ title('Effect of Airfoil Thickness on Lift Coefficient')
 ylim([-5 5])
 hold off
 
+% tables
 lin_idx = (alpha >= -3) & (alpha <= 3);
 
 fit_0006 = polyfit(alpha(lin_idx),cl_0006(lin_idx),1);
@@ -143,22 +144,24 @@ a0_tat = 0;
 
 lin_exp6 = (alpha_exp_0006 >= -3) & (alpha_exp_0006 <= 3);
 fit_exp6 = polyfit(alpha_exp_0006(lin_exp6),cl_exp_0006(lin_exp6),1);
-slope_exp6 = fit_exp6(1); a0_exp6 = -fit_exp6(2)/fit_exp6(1);
+slope_exp6 = fit_exp6(1); a0_exp6 = -fit_exp6(2)/fit_exp6(1); % 0006 experimental data slope
 
 lin_exp12 = (alpha_exp_0012 >= -3) & (alpha_exp_0012 <= 3);
 fit_exp12 = polyfit(alpha_exp_0012(lin_exp12),cl_exp_0012(lin_exp12),1);
-slope_exp12 = fit_exp12(1); a0_exp12 = -fit_exp12(2)/fit_exp12(1);
+slope_exp12 = fit_exp12(1); a0_exp12 = -fit_exp12(2)/fit_exp12(1); % 0012 experimental data slope
 
-slope_exp18 = NaN; a0_exp18 = NaN;
+slope_exp18 = NaN; a0_exp18 = NaN; % no experimental data for 0018
 
 airfoils = {'NACA 0006';'NACA 0012';'NACA 0018'};
 
+% AoA
 disp('Zero Lift Angle of Attack (Degrees)')
 table_aoa = table(airfoils,[a0_0006;a0_0012;a0_0018], ...
     [a0_tat;a0_tat;a0_tat],[a0_exp6;a0_exp12;a0_exp18], ...
     'VariableNames',{'Airfoil','Vortex_Panel_deg','Thin_Airfoil_Theory_deg','Experimental_deg'});
 disp(table_aoa)
 
+% C_L
 disp('Sectional Lift Coefficient (1/Degree)')
 table_slope = table(airfoils,[slope_0006;slope_0012;slope_0018], ...
     [slope_tat;slope_tat;slope_tat],[slope_exp6;slope_exp12;slope_exp18], ...
