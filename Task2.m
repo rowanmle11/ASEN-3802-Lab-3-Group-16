@@ -1,3 +1,39 @@
+clc;
+clear;
+close all;
+b = 10; 
+a0_t = 2*pi; 
+a0_r = 2*pi; 
+c_r = 1;
+N = 50; 
+aero_t = 3; 
+aero_r = 3;
+geo_t = 4; 
+geo_r = 4; 
+
+AR_list = [4 6 8 10];
+taper_ratio = linspace(0,1,100);
+delta_all = zeros(length(AR_list), length(taper_ratio));
+
+for k = 1:length(AR_list)
+    AR = AR_list(k);
+
+    for i = 1:length(taper_ratio)
+        taper = taper_ratio(i); 
+        c_t = taper * c_r;
+        b = AR * (c_r + c_t) / 2; % AR = b^2/S ++ S = (cr+ct)b/2
+        [e, c_L, c_Di] = PLLT(b, a0_t, a0_r, c_t, c_r, aero_t, aero_r, geo_t, geo_r, N);
+        delta_all(k,i) = (1/e) - 1;
+    end
+end
+
+
+plot(taper_ratio, delta_all, 'LineWidth',2)
+title('$\delta$ vs. $\frac{c_t}{c_r}$','Interpreter', 'latex')
+xlabel('$\frac{c_t}{c_r}$','Interpreter', 'latex');
+ylabel('$\delta$','Interpreter', 'latex');
+legend(compose('AR = %g', AR_list), 'Location', 'best');
+
 function [e,c_L,c_Di] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,N)
 
     % degrees to radians
