@@ -11,13 +11,12 @@ aero_r = 3;
 geo_t = 4; 
 geo_r = 4; 
 
-AR_list = [4 6 8 10];
-taper_ratio = linspace(0,1,100);
-delta_all = zeros(length(AR_list), length(taper_ratio));
+AR_Vals = [4 6 8 10];
+taper_ratio = linspace(0.008,1,100);
+delta_all = zeros(length(AR_Vals), length(taper_ratio));
 
-for k = 1:length(AR_list)
-    AR = AR_list(k);
-
+for k = 1:length(AR_Vals)
+    AR = AR_Vals(k);
     for i = 1:length(taper_ratio)
         taper = taper_ratio(i); 
         c_t = taper * c_r;
@@ -32,7 +31,7 @@ plot(taper_ratio, delta_all, 'LineWidth',2)
 title('$\delta$ vs. $\frac{c_t}{c_r}$','Interpreter', 'latex')
 xlabel('$\frac{c_t}{c_r}$','Interpreter', 'latex');
 ylabel('$\delta$','Interpreter', 'latex');
-legend(compose('AR = %g', AR_list), 'Location', 'best');
+legend(compose('AR = %g', AR_Vals), 'Location', 'best');
 
 function [e,c_L,c_Di] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,N)
 
