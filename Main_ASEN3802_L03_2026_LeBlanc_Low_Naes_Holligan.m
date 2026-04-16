@@ -32,7 +32,7 @@ title('NACA Airfoil Shape')
 
 alpha = 12;
 
-Num_Panels = 500;
+Num_Panels = 400;
 chord = 1;
 cl = zeros(1,Num_Panels);
     count = 0;
@@ -173,7 +173,7 @@ disp(table_slope)
 % pull experimental data
 Airfoil2412Data=readmatrix("Airfoil2412Data.csv");
 Airfoil4412Data=readmatrix("Airfoil4412Data.csv");
-
+exp_0012=readmatrix("Airfoil0012Data.csv");
 
 N = ceil(xid);
 
