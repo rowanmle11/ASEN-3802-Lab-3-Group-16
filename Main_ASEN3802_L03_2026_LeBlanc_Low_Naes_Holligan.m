@@ -32,7 +32,7 @@ title('NACA Airfoil Shape')
 
 alpha = 12;
 
-Num_Panels = 400;
+Num_Panels = 500;
 chord = 1;
 cl = zeros(1,Num_Panels);
     count = 0;
@@ -173,7 +173,7 @@ disp(table_slope)
 % pull experimental data
 Airfoil2412Data=readmatrix("Airfoil2412Data.csv");
 Airfoil4412Data=readmatrix("Airfoil4412Data.csv");
-exp_0012=readmatrix("Airfoil0012Data.csv");
+
 
 N = ceil(xid);
 
@@ -316,6 +316,101 @@ title('$\delta$ vs. $\frac{c_t}{c_r}$','Interpreter', 'latex')
 xlabel('$\frac{c_t}{c_r}$','Interpreter', 'latex');
 ylabel('$\delta$','Interpreter', 'latex');
 legend(compose('AR = %g', AR_list), 'Location', 'best');
+
+%% ASEN 3802 Lab 3 Part 3: Analysis of Approximate Cessna 140 Wing Performance
+
+b = 33 + 4/12; % span
+c_r = 5 + 4/12; % root chord
+c_t = 3 + 8.5/12; % tip chord
+S = b*(c_r+c_t)/2; % wing area
+
+% Vortex Panel Method -> find a0 and alpha_L=0
+N = N*2;
+alpha_test = [-2,0,2];
+
+% tip (NACA 0012)
+cl_tip = zeros(1,3);
+for i = 1:3
+    [x,y,~,~]=NACA_Airfoils(0,0,0.12,c,N);
+    cl_tip(i) = Vortex_Panel(x,y,alpha_test(i));
+end
+p_tip = polyfit(alpha_test,cl_tip,1);
+a0_t_deg = p_tip(1);
+a0_t = rad2deg(a0_t_deg); % convert to 1/rad for PLLT
+aero_t = -p_tip(2)/p_tip(1); % zero-lift aoa in degrees
+
+% root (NACA 2412)
+cl_root = zeros(1,3);
+for i = 1:3
+    [x,y,~,~] = NACA_Airfoils(0.02,0.4,0.12,c,N);
+    cl_root(i) = Vortex_Panel(x,y,alpha_test(i));
+end
+p_root = polyfit(alpha_test,cl_root,1);
+a0_r_deg = p_root(1);
+a0_r = rad2deg(a0_r_deg); % convert to 1/rad for PLLT
+aero_r = -p_root(2)/p_root(1); % zero-lift aoa in degrees
+
+% geometric twist
+geo_r = 1;
+geo_t = 0;
+
+% For deliverables 1 + 2
+alpha_wing = 4;
+geo_r_conv = geo_r + alpha_wing;
+geo_t_conv = geo_t + alpha_wing;
+
+max_terms = 50;
+N_terms = 1:max_terms;
+CL_conv = zeros(1,max_terms);
+CDi_conv = zeros(1,max_terms);
+
+for i = 1:max_terms
+    [~,CL_conv(i),CDi_conv(i)] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t_conv,geo_r_conv,N_terms(i));
+end
+
+% assume N = max_terms is exact solution for error calculation
+CL_exact = CL_conv(end);
+CDi_exact = CDi_conv(end);
+
+rel_err_CL = abs(CL_conv - CL_exact) / CL_exact * 100;
+rel_err_CDi = abs(CDi_conv - CDi_exact) / CDi_exact * 100;
+
+err_thresholds = [10, 1, 0.1];
+terms_req_CL = zeros(1,3);
+terms_req_CDi = zeros(1,3);
+
+for k = 1:3
+    terms_req_CL(k) = find(rel_err_CL <= err_thresholds(k),1,'first');
+    terms_req_CDi(k) = find(rel_err_CDi <= err_thresholds(k),1,'first');
+end
+
+% DELIVERABLE 1
+disp('Convergence Table')
+Conv_Table = table(err_thresholds',terms_req_CL',terms_req_CDi',CL_conv(terms_req_CL)',CDi_conv(terms_req_CDi)','VariableNames',{'Error_Threshold_Percent','Odd_Terms_CL','Odd_Terms_CDi','CL_Value','CDi_Value'});
+disp(Conv_Table)
+
+% DELIVERABLE 2
+figure
+
+subplot(2,1,1)
+plot(N_terms,CL_conv,'b-','LineWidth',2)
+hold on
+grid on
+xline(terms_req_CL(1),'r--','10% Error')
+xline(terms_req_CL(2),'g--','1% Error')
+xline(terms_req_CL(3),'k--','0.1% Error')
+xlabel('Number of Odd Terms'); ylabel('C_L','Interpreter','tex')
+title('Convergence of Lift Coefficient')
+
+subplot(2,1,2)
+plot(N_terms,CDi_conv,'b-','LineWidth',2)
+hold on
+grid on
+xline(terms_req_CDi(1),'r--','10% Error')
+xline(terms_req_CDi(2),'g--','1% Error')
+xline(terms_req_CDi(3),'k--','0.1% Error')
+xlabel('Number of Odd Terms'); ylabel('C_{D,i}','Interpreter','tex')
+title('Convergence of Induced Drag Coefficient')
 
 %% FUNCTIONS
 
