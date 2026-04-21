@@ -412,6 +412,79 @@ xline(terms_req_CDi(3),'k--','0.1% Error')
 xlabel('Number of Odd Terms'); ylabel('C_{D,i}','Interpreter','tex')
 title('Convergence of Induced Drag Coefficient')
 
+%% Deliverable 3
+
+N_del3 = max(terms_req_CL(3), terms_req_CDi(3));
+
+h = 10000 * 0.3048; % ft to m
+rho_imperial = 0.001756;% slug/ft^3
+V_kts = 100;
+V_fps = V_kts * 1.68781; % knots to ft/s
+q = 0.5 * rho_imperial * V_fps^2; % lb/ft^2
+
+alpha_wing = 4;
+geo_r_conv = geo_r + alpha_wing;
+geo_t_conv = geo_t + alpha_wing;
+
+[~, CL_del3, CDi_del3] = PLLT(b, a0_t, a0_r, c_t, c_r, aero_t, aero_r, geo_t_conv, geo_r_conv, N_del3);
+
+cd_0012 = 0.006; % From Abbot_TheoryOfWingSections_1959
+cd_2412 = 0.0065; % Also from Abbot_TheoryOfWingSections_1959
+cd_avg  = (cd_0012 + cd_2412) / 2;
+
+CD_total = cd_avg + CDi_del3;
+
+S_ft2 = S;
+
+L = q * S_ft2 * CL_del3;
+Di = q * S_ft2 * CDi_del3;
+D  = q * S_ft2 * CD_total;
+LD = L / D;
+ 
+Del3_Table = table(L, Di, D, LD,'VariableNames', {'Lift_L_lbf','Induced_Drag_Di_lbf', 'Total_Drag_D_lbf','L_over_D'});
+disp('Deliverable 3 Results')
+disp(Del3_Table)
+
+%% Deliverable 4
+
+alpha_vals = linspace(-5, 15, 100);
+N_del4 = max(terms_req_CL(3), terms_req_CDi(3));
+
+CL_sweep  = zeros(1, length(alpha_vals));
+CDi_sweep = zeros(1, length(alpha_vals));
+
+for i = 1:length(alpha_vals)
+    geo_r_i = geo_r + alpha_vals(i);
+    geo_t_i = geo_t + alpha_vals(i);
+
+    [~, CL_sweep(i), CDi_sweep(i)] = PLLT(b, a0_t, a0_r, c_t, c_r, aero_t, aero_r, geo_t_i, geo_r_i, N_del4);
+end
+
+% [Cl, Cd] 
+Abbott_0012 = [-0.8, 0.0080; -0.4, 0.0065; 0.0, 0.0060; 0.4, 0.0065; 0.8, 0.0080; 1.0, 0.0100; 1.2, 0.0130];
+Abbott_2412 = [-0.4, 0.008; 0.0, 0.0065; 0.4, 0.006; 0.8, 0.0070; 1.0, 0.0085; 1.2, 0.0110; 1.4, 0.0140];
+
+cd_0012_interp = interp1(Abbott_0012(:,1), Abbott_0012(:,2), CL_sweep, 'linear', 'extrap');
+cd_2412_interp = interp1(Abbott_2412(:,1), Abbott_2412(:,2), CL_sweep, 'linear', 'extrap');
+
+cd_profile_interp = (cd_0012_interp + cd_2412_interp) / 2;
+
+CD_total_interp = cd_profile_interp + CDi_sweep;
+
+figure();
+hold on
+grid on
+
+% Plot all components
+plot(alpha_vals, CD_total_interp, 'k-', 'LineWidth', 2)
+plot(alpha_vals, CDi_sweep, 'r--', 'LineWidth', 2)
+plot(alpha_vals, cd_profile_interp,'b--', 'LineWidth', 2)
+xlabel('Angle of Attack \alpha [deg]', 'Interpreter', 'tex')
+ylabel('Drag Coefficient C_D', 'Interpreter', 'tex')
+title('Total Drag Coefficient vs. Angle of Attack')
+legend('C_D Total', 'C_{D,i} Induced', 'c_d Profile', 'Location', 'best', 'Interpreter', 'tex')
+hold off
+
 %% FUNCTIONS
 
 function [x_b, y_b, x, y_c] = NACA_Airfoils(m,p,t,c,N)
