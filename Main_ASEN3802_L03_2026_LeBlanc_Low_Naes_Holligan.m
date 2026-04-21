@@ -485,6 +485,24 @@ title('Total Drag Coefficient vs. Angle of Attack')
 legend('C_D Total', 'C_{D,i} Induced', 'c_d Profile', 'Location', 'best', 'Interpreter', 'tex')
 hold off
 
+%% Deliverable 5
+
+L_D_total = CL_sweep./CD_total_interp;
+
+figure();
+hold on
+grid on
+plot(alpha_vals,L_D_total,'k','LineWidth',2)
+
+xlabel('Angle of Attack \alpha [deg]')
+ylabel('Lift to Drag Ratio L/D')
+title('Lift to Drag Ratio vs. Angle of Attack')
+
+hold off
+
+
+
+
 %% FUNCTIONS
 
 function [x_b, y_b, x, y_c] = NACA_Airfoils(m,p,t,c,N)
