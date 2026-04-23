@@ -331,7 +331,7 @@ alpha_test = [-2,0,2];
 % tip (NACA 0012)
 cl_tip = zeros(1,3);
 for i = 1:3
-    [x,y,~,~]=NACA_Airfoils(0,0,0.12,c,N);
+    [x,y,~,~] = NACA_Airfoils(0,0,0.12,c,N);
     cl_tip(i) = Vortex_Panel(x,y,alpha_test(i));
 end
 p_tip = polyfit(alpha_test,cl_tip,1);
@@ -359,7 +359,7 @@ alpha_wing = 4;
 geo_r_conv = geo_r + alpha_wing;
 geo_t_conv = geo_t + alpha_wing;
 
-max_terms = 50;
+max_terms = 500;
 N_terms = 1:max_terms;
 CL_conv = zeros(1,max_terms);
 CDi_conv = zeros(1,max_terms);
@@ -384,12 +384,12 @@ for k = 1:3
     terms_req_CDi(k) = find(rel_err_CDi <= err_thresholds(k),1,'first');
 end
 
-% DELIVERABLE 1
-disp('Convergence Table')
+%% DELIVERABLE 1
+disp('Deliverable 1 Results: Convergence Table')
 Conv_Table = table(err_thresholds',terms_req_CL',terms_req_CDi',CL_conv(terms_req_CL)',CDi_conv(terms_req_CDi)','VariableNames',{'Error_Threshold_Percent','Odd_Terms_CL','Odd_Terms_CDi','CL_Value','CDi_Value'});
 disp(Conv_Table)
 
-% DELIVERABLE 2
+%% DELIVERABLE 2
 figure
 
 subplot(2,1,1)
@@ -399,6 +399,7 @@ grid on
 xline(terms_req_CL(1),'r--','10% Error')
 xline(terms_req_CL(2),'g--','1% Error')
 xline(terms_req_CL(3),'k--','0.1% Error')
+xlim([0,100])
 xlabel('Number of Odd Terms'); ylabel('C_L','Interpreter','tex')
 title('Convergence of Lift Coefficient')
 
@@ -409,10 +410,11 @@ grid on
 xline(terms_req_CDi(1),'r--','10% Error')
 xline(terms_req_CDi(2),'g--','1% Error')
 xline(terms_req_CDi(3),'k--','0.1% Error')
+xlim([0,100])
 xlabel('Number of Odd Terms'); ylabel('C_{D,i}','Interpreter','tex')
 title('Convergence of Induced Drag Coefficient')
 
-%% Deliverable 3
+%% DELIVERABLE 3
 
 N_del3 = max(terms_req_CL(3), terms_req_CDi(3));
 
@@ -445,7 +447,7 @@ Del3_Table = table(L, Di, D, LD,'VariableNames', {'Lift_L_lbf','Induced_Drag_Di_
 disp('Deliverable 3 Results')
 disp(Del3_Table)
 
-%% Deliverable 4
+%% DELIVERABLE 4
 
 alpha_vals = linspace(-5, 15, 100);
 N_del4 = max(terms_req_CL(3), terms_req_CDi(3));
@@ -499,9 +501,6 @@ ylabel('Lift to Drag Ratio L/D')
 title('Lift to Drag Ratio vs. Angle of Attack')
 
 hold off
-
-
-
 
 %% FUNCTIONS
 
